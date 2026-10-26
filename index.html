@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Brain Stack</title>
+  <meta name="description" content="A calm evening routine timer: breathe, journal, puzzle, color and read, one gentle step at a time.">
+  <meta name="theme-color" content="#14162a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" crossorigin href="https://fonts.googleapis.com/css2?family=Lexend:wght@300..700&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply the saved theme before first paint to avoid a bright flash at night.
+    (function () {
+      var theme = 'evening';
+      try { theme = JSON.parse(localStorage.getItem('brainstack')).settings.theme || theme; } catch (e) {}
+      var root = document.documentElement;
+      if (theme === 'system') root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
+    })();
+  </script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+  <noscript>Brain Stack needs JavaScript to run.</noscript>
+</body>
+</html>
