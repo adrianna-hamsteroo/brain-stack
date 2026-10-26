@@ -1,14 +1,15 @@
 // Runs one evening session: check-in, each step with its timer, the "up next"
-// screen between steps, check-out and the finished cairn. The session object
+// screen between steps, check-out, the daily check-up and the finished cairn. The session object
 // lives in state.session and is saved on every change, so closing the app
 // mid-step loses nothing.
 import { h, icon, svg, noiseWave, ask, toast } from './ui.js';
 import { TEMPLATES, NOISE, tipFor, makeId } from './data.js';
-import { state, save, eveningKey, hueOf } from './store.js';
+import { state, save, eveningKey, hueOf, saveCheckup } from './store.js';
 import { createTimer, elapsed, remaining, isPaused, pause, resume, extend, stopAtZero, clock, minutesLabel } from './timer.js';
 import { unlock, chime, buzz, keepAwake } from './sound.js';
 import { pacer, PATTERN_NAMES } from './breath.js';
 import { cairnSVG, stonesFromResults } from './cairn.js';
+import { checkupFlow, enabledQuestions, answerList } from './checkup.js';
 
 // Testing aid: ?speed=60 makes every minute last one second.
 const SPEED = Math.max(1, Number(new URLSearchParams(location.search).get('speed')) || 1);
@@ -141,10 +142,9 @@ export function mountSession(host, { onExit }) {
   // after 20 seconds without a touch. Any tap or key brings it back.
   function wake() {
     clearTimeout(idleTimer);
-    const el = host.querySelector('.session');
-    el?.classList.remove('dimmed');
+    host.classList.remove('dimmed');
     if (s.phase === 'step' && s.steps[s.index].mode !== 'breath') {
-      idleTimer = setTimeout(() => el?.classList.add('dimmed'), DIM_MS);
+      idleTimer = setTimeout(() => host.classList.add('dimmed'), DIM_MS);
     }
   }
 
@@ -182,6 +182,7 @@ export function mountSession(host, { onExit }) {
       case 'step': return stepScreen();
       case 'transition': return transitionScreen();
       case 'checkout': return checkinScreen('after');
+      case 'checkup': return checkupScreen();
       default: return summaryScreen();
     }
   }
@@ -197,6 +198,7 @@ export function mountSession(host, { onExit }) {
         }))),
       h('span', { class: 'session-count' },
         s.phase === 'checkin' || s.phase === 'checkout' ? 'Check-in' :
+        s.phase === 'checkup' ? 'Check-up' :
         s.phase === 'summary' ? s.routineName : `Step ${current + 1} of ${s.steps.length}`),
     );
   }
@@ -224,7 +226,7 @@ export function mountSession(host, { onExit }) {
         go(0);
       } else {
         s.after = n;
-        finalize();
+        afterStack();
       }
     }
   }
@@ -345,6 +347,8 @@ export function mountSession(host, { onExit }) {
         h('span', { class: 'arrow', 'aria-hidden': 'true' }, '→'),
         h('span', { class: 'noise-chip', style: { '--wave': `var(--noise-${s.after})` } }, noiseWave(s.after), NOISE[s.after - 1])),
       h('p', { class: 'note' }, note),
+      answerList(s.checkup).length > 0 && h('ul', { class: 'answers compact', 'aria-label': 'Your check-up' },
+        answerList(s.checkup).map(({ q, label }) => h('li', null, h('span', { class: 'answer-q' }, q.label), label))),
       h('button', { class: 'btn primary big', 'data-autofocus': '', onclick: exit }, 'Done'),
     );
   }
@@ -453,7 +457,7 @@ export function mountSession(host, { onExit }) {
   }
 
   function signal(kind) {
-    if (state.settings.sound) chime(kind, state.settings.volume);
+    if (state.settings.sound) chime(kind, state.settings.volume, state.settings.chime);
     if (state.settings.vibrate) buzz(kind === 'end' ? [240, 140, 240] : [90]);
   }
 
@@ -493,8 +497,23 @@ export function mountSession(host, { onExit }) {
       save();
       render();
     } else {
-      finalize();
+      afterStack();
     }
+  }
+
+  // The daily check-up comes once per evening, after the last step.
+  function afterStack() {
+    const wanted = state.settings.checkup && enabledQuestions().length && !state.checkups[eveningKey(s.startedAt)];
+    if (!wanted) return finalize();
+    s.phase = 'checkup';
+    save();
+    render();
+  }
+
+  function checkupScreen() {
+    const box = h('div', { class: 'session-main' });
+    checkupFlow(box, { onDone: answers => { s.checkup = answers; finalize(); } });
+    return box;
   }
 
   function togglePause() {
@@ -537,6 +556,7 @@ export function mountSession(host, { onExit }) {
   function finalize() {
     stopTicking();
     storeEntry(s, Date.now());
+    saveCheckup(eveningKey(s.startedAt), s.checkup);
     s.phase = 'summary';
     keepAwake(false);
     save();
@@ -545,7 +565,7 @@ export function mountSession(host, { onExit }) {
 
   async function askEnd() {
     if (s.phase === 'summary') return exit();
-    if (s.phase === 'checkout') return finalize();
+    if (s.phase === 'checkout' || s.phase === 'checkup') return finalize();
     const partial = s.phase === 'step' && elapsed(s.timer) * SPEED >= 30000;
     const hasProgress = partial || s.results.some(r => r?.status === 'done');
     const ok = await ask({

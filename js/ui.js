@@ -50,29 +50,36 @@ export function noiseWave(level, width = 44, height = 20) {
   return svg(`<svg class="wave" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`);
 }
 
-export function ask({ title, body = '', confirm = 'OK', cancel = 'Cancel', danger = false }) {
+// A modal sheet. build(close) returns its content; close(value) resolves the
+// promise. Escape or a tap outside closes it with `undefined`.
+export function openSheet(build, { label = 'Dialog', wide = false } = {}) {
   return new Promise(resolve => {
-    const dialog = h('dialog', { class: 'sheet', 'aria-labelledby': 'ask-title' },
-      h('h2', { id: 'ask-title' }, title),
-      body && h('p', null, body),
-      h('div', { class: 'sheet-actions' },
-        h('button', { class: 'btn ghost', value: 'cancel', onclick: () => close(false) }, cancel),
-        h('button', { class: `btn ${danger ? 'danger' : 'primary'}`, onclick: () => close(true) }, confirm),
-      ),
-    );
+    const dialog = h('dialog', { class: `sheet ${wide ? 'wide' : ''}`, 'aria-label': label });
     let done = false;
-    function close(result) {
+    function close(value) {
       if (done) return;
       done = true;
       dialog.close();
       dialog.remove();
-      resolve(result);
+      resolve(value);
     }
-    dialog.addEventListener('cancel', e => { e.preventDefault(); close(false); });
-    dialog.addEventListener('click', e => { if (e.target === dialog) close(false); });
+    dialog.addEventListener('cancel', e => { e.preventDefault(); close(undefined); });
+    dialog.addEventListener('click', e => { if (e.target === dialog) close(undefined); });
+    dialog.append(...[build(close)].flat().filter(Boolean));
     document.body.append(dialog);
     if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
   });
+}
+
+export async function ask({ title, body = '', confirm = 'OK', cancel = 'Cancel', danger = false }) {
+  const result = await openSheet(close => [
+    h('h2', null, title),
+    body && h('p', null, body),
+    h('div', { class: 'sheet-actions' },
+      h('button', { class: 'btn ghost', onclick: () => close(false) }, cancel),
+      h('button', { class: `btn ${danger ? 'danger' : 'primary'}`, onclick: () => close(true) }, confirm)),
+  ], { label: title });
+  return result === true;
 }
 
 let toastTimer = 0;

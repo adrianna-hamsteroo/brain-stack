@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-accent="dusk">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -16,11 +16,14 @@
   <script>
     // Apply the saved theme before first paint to avoid a bright flash at night.
     (function () {
-      var theme = 'evening';
-      try { theme = JSON.parse(localStorage.getItem('brainstack')).settings.theme || theme; } catch (e) {}
+      var s = {};
+      try { s = JSON.parse(localStorage.getItem('brainstack')).settings || {}; } catch (e) {}
       var root = document.documentElement;
+      var theme = s.theme || 'evening';
       if (theme === 'system') root.removeAttribute('data-theme');
       else root.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
+      root.setAttribute('data-accent', s.accent || 'dusk');
+      root.setAttribute('data-motion', s.motion === false ? 'off' : 'on');
     })();
   </script>
   <script type="module" src="js/app.js"></script>

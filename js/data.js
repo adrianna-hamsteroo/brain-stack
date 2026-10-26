@@ -33,6 +33,21 @@ export const ICONS = {
   sound: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/>',
   download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
   upload: '<path d="M12 15V4M7 9l5-5 5 5M5 20h14"/>',
+  grip: '<circle cx="9" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.4" fill="currentColor" stroke="none"/>',
+  calendar: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  walk: '<circle cx="13" cy="4.5" r="1.8"/><path d="M12.5 8 11 14l-2.5 6M11 14l3 3 1 3.5M12.3 9.5 9 12M12.3 9.5l3.2 2.5"/>',
+  dumbbell: '<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
+  bike: '<circle cx="6" cy="16.5" r="3.5"/><circle cx="18" cy="16.5" r="3.5"/><path d="M6 16.5 9.5 9h6l2.5 7.5M9.5 9l3 7.5H6M15.5 9l-1-3h2.5"/>',
+  tree: '<path d="M12 21v-5"/><path d="M12 3l5 7h-3l4 6H6l4-6H7z"/>',
+  people: '<circle cx="9" cy="8" r="3"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M3.5 19c.5-3.5 2.8-5.5 5.5-5.5s5 2 5.5 5.5"/><path d="M15 14.2c.5-.1 1-.2 1.5-.2 2.2 0 4 1.6 4.5 4.5"/>',
+  cup: '<path d="M5 10h11v4a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5c0 1.5 1.2 1.5 1.2 3M12 3.5c0 1.5 1.2 1.5 1.2 3"/>',
+  ticket: '<path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/><path d="M14 7.5v2M14 11v2M14 14.5v2"/>',
+  note: '<path d="M9 18V5.5l10-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+  pot: '<path d="M4 11h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z"/><path d="M2.5 11h19"/><path d="M9 7.5c0-1.5 1-1.5 1-3M14 7.5c0-1.5 1-1.5 1-3"/>',
+  drop: '<path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10z"/>',
+  game: '<rect x="3" y="8" width="18" height="10" rx="5"/><path d="M8 11v4M6 13h4"/><path d="M15.5 12h.01M17.5 14h.01" stroke-width="2.4"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+  heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
 };
 
 // Icons a person can pick for their own activities.
@@ -196,6 +211,54 @@ export const GROUNDING = [
   '3 things you can hear',
   '2 things you can smell',
   '1 thing you can taste',
+];
+
+// Things you did today outside the stack, logged with one tap.
+export const EXTRA_PRESETS = [
+  { type: 'walk', name: 'Walk', icon: 'walk' },
+  { type: 'workout', name: 'Workout', icon: 'dumbbell' },
+  { type: 'yoga', name: 'Yoga', icon: 'body' },
+  { type: 'bike', name: 'Bike ride', icon: 'bike' },
+  { type: 'outdoors', name: 'Time outdoors', icon: 'tree' },
+  { type: 'friends', name: 'Friends', icon: 'people' },
+  { type: 'cafe', name: 'Café', icon: 'cup' },
+  { type: 'cinema', name: 'Cinema', icon: 'ticket' },
+  { type: 'music', name: 'Music', icon: 'note' },
+  { type: 'cooking', name: 'Cooking', icon: 'pot' },
+  { type: 'bath', name: 'Bath', icon: 'drop' },
+  { type: 'gaming', name: 'Gaming', icon: 'game' },
+];
+
+export const EXTRA_ICONS = ['walk', 'dumbbell', 'body', 'bike', 'tree', 'people', 'cup', 'ticket', 'note', 'pot', 'drop', 'game', 'sun', 'heart', 'gratitude', 'read'];
+
+// Daily check-up: tap-only questions after the stack, shown one at a time.
+// `better` says which end of the options is the easier day.
+export const CHECKUP = [
+  { id: 'mood', label: 'Mood', q: 'How was your mood today?', options: ['Low', 'Meh', 'Okay', 'Good', 'Great'], better: 'up', on: true },
+  { id: 'worry', label: 'Worry', q: 'How much did worry take up today?', options: ['Hardly any', 'A little', 'Some', 'A lot', 'Most of the day'], better: 'down', on: true },
+  { id: 'panic', label: 'Panic', q: 'Any panicky moments today?', options: ['None', 'A wobble', 'Yes, one', 'More than one'], better: 'down', on: true },
+  { id: 'sleep', label: 'Sleep', q: 'How did you sleep last night?', options: ['Badly', 'Restless', 'Okay', 'Well', 'Really well'], better: 'up', on: true },
+  { id: 'energy', label: 'Energy', q: 'How was your energy today?', options: ['Drained', 'Low', 'Okay', 'Good', 'Full of energy'], better: 'up', on: false },
+  { id: 'focus', label: 'Focus', q: 'How was your focus today?', options: ['Scattered', 'Up and down', 'Mostly okay', 'Focused'], better: 'up', on: false },
+  { id: 'connect', label: 'Connection', q: 'Did you connect with someone you like?', options: ['No', 'A little', 'Yes'], better: 'up', on: false },
+  { id: 'kind', label: 'Kindness', q: 'Were you kind to yourself today?', options: ['Not really', 'Sometimes', 'Mostly'], better: 'up', on: false },
+];
+
+// 0 = hardest answer, 1 = easiest, whichever way round the options run.
+export function checkupEase(q, index) {
+  const t = index / (q.options.length - 1);
+  return q.better === 'up' ? t : 1 - t;
+}
+
+// Color themes; the colors themselves live in styles.css.
+export const THEMES = [
+  { id: 'dusk', name: 'Lamplight' },
+  { id: 'rose', name: 'Pink' },
+  { id: 'violet', name: 'Violet' },
+  { id: 'forest', name: 'Green' },
+  { id: 'ocean', name: 'Blue' },
+  { id: 'sunset', name: 'Orange' },
+  { id: 'honey', name: 'Yellow' },
 ];
 
 let uid = 0;

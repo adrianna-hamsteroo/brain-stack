@@ -17,6 +17,10 @@ It is a Progressive Web App (PWA): one codebase that installs on a computer
   mental effort to bodily calm: set the scene, journal, puzzle, coloring,
   reading, three good things, breathing. Every step, timing and prompt is
   editable. See [RESEARCH.md](RESEARCH.md) for why.
+- **Your own stacks**: create as many as you like, reorder steps by holding
+  and dragging, and **plan** a stack for certain weeknights (every Sunday) or
+  for dates (tonight, this week, this month). Tonight opens with the planned
+  stack; you can still switch.
 - **Visual timer** in the style of a Time Timer: a colored wedge that shrinks
   as time passes, one tick per minute, plus the clock time the step ends.
 - **Open-ended journaling** that counts up and gives a gentle nudge at 10
@@ -34,9 +38,19 @@ It is a Progressive Web App (PWA): one codebase that installs on a computer
   without a touch during a step.
 - **Check-in before and after** ("how busy is your mind?") so you can see the
   routine working over time.
+- **Daily check-up** after the stack: a few multiple-choice questions (mood,
+  worry, panicky moments, sleep; more in Settings), one per screen, all
+  skippable. Progress shows the last 14 days at a glance.
+- **Activity log**: one tap to log a walk, workout, café, cinema and so on,
+  or your own activities, as extras for the day outside the stack.
+- **Seven color themes** (Lamplight, Pink, Violet, Green, Blue, Orange,
+  Yellow), each in light and dark, over a slowly drifting gradient.
+- **Three chime sounds**: a light wind chime (default), a music box, or the
+  original singing bowl.
 - **Weekly goal instead of streaks**: 5 of 7 evenings by default, with rest
   nights built in. Progress shows as little cairns of stones, a five-week
-  calendar and history. Missing a day never resets anything.
+  calendar and history; tap any day to see its stack, check-up and
+  activities. Missing a day never resets anything.
 - **Why these timings?** page inside the app with the research and sources.
 - Chimes are synthesized in the browser (no audio files). Everything stays on
   your device; backup/restore moves your data between phone and computer.
@@ -103,10 +117,14 @@ Plain HTML, CSS and JavaScript modules, no build step.
 | File | What it holds |
 |---|---|
 | `js/data.js` | Activities, default routines, prompts, icons |
-| `js/session.js` | The session runner: check-in, steps, transitions, summary |
+| `js/session.js` | The session runner: check-in, steps, transitions, check-up, summary |
+| `js/checkup.js` | Daily check-up questions, one per screen |
+| `js/tracker.js` | Activity log and the day view |
+| `js/drag.js` | Hold-and-drag reordering for mouse and touch |
 | `js/timer.js` | Timestamp-based timer (survives throttling and restarts) |
 | `js/breath.js` | Cyclic-sighing pacer |
 | `js/views.js` | Tonight, Routine, Progress and Settings screens |
+| `styles.css` | Layout and the seven color themes (each theme's colors are set once, for dark and light) |
 | `js/science.js` | "Why these timings?" content and sources |
 | `sw.js` | Offline cache. Bump `VERSION` after changing any file |
 

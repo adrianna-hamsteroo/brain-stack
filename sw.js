@@ -1,7 +1,7 @@
 // Offline support: the app shell is cached on install and served cache-first,
 // refreshed in the background so updates arrive on the next launch.
 // Bump VERSION whenever you change any file listed in SHELL.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL_CACHE = `brain-stack-${VERSION}`;
 const FONT_CACHE = 'brain-stack-fonts';
 const SHELL = [
@@ -13,12 +13,15 @@ const SHELL = [
   'js/breath.js',
   'js/cairn.js',
   'js/calm.js',
+  'js/checkup.js',
   'js/data.js',
+  'js/drag.js',
   'js/science.js',
   'js/session.js',
   'js/sound.js',
   'js/store.js',
   'js/timer.js',
+  'js/tracker.js',
   'js/ui.js',
   'js/views.js',
   'icons/icon.svg',

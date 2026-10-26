@@ -1,11 +1,13 @@
-// Boot, tab navigation, overlays (session and quick calm), theme, offline
-// support and the install prompt.
+// Boot, tab navigation, overlays (session, quick calm, check-up), sub-pages
+// (research, day view), theme, offline support and the install prompt.
 import { h, icon, isEmbedded } from './ui.js';
 import { state, save } from './store.js';
 import { startSession, mountSession, closeStaleSession } from './session.js';
 import { mountCalm } from './calm.js';
 import { tonightView, routineView, progressView, settingsView } from './views.js';
 import { scienceView } from './science.js';
+import { dayView } from './tracker.js';
+import { mountCheckup } from './checkup.js';
 
 const root = document.getElementById('app');
 const TABS = [
@@ -16,8 +18,9 @@ const TABS = [
 ];
 
 let tab = 'tonight';
-let sub = null;      // 'science', shown over Settings
-let overlay = null;  // { kind: 'session' | 'calm', api }
+let sub = null;      // 'science' over Settings, 'day' over Progress
+let dayKey = null;   // the day shown when sub is 'day'
+let overlay = null;  // { kind: 'session' | 'calm' | 'checkup', api }
 let ignorePop = false;
 
 // When the app is embedded in a preview, "Match device" hands the theme back
@@ -43,11 +46,15 @@ const app = {
   openCalm() {
     openOverlay('calm', host => mountCalm(host, { onExit: closeOverlay }));
   },
+  openCheckup(date) {
+    openOverlay('checkup', host => mountCheckup(host, { date, onExit: closeOverlay }));
+  },
   openScience() {
-    sub = 'science';
-    history.pushState({ sub }, '');
-    render();
-    window.scrollTo(0, 0);
+    openSub('science');
+  },
+  openDay(key) {
+    dayKey = key;
+    openSub('day');
   },
   closeSub() {
     sub = null;
@@ -65,10 +72,18 @@ const app = {
   },
 };
 
+function openSub(name) {
+  if (sub) history.replaceState({ sub: name }, '');
+  else history.pushState({ sub: name }, '');
+  sub = name;
+  render();
+  window.scrollTo(0, 0);
+}
+
 function render() {
   if (overlay) return;
   const current = TABS.find(t => t.id === tab);
-  const content = sub === 'science' ? scienceView(app) : current.view(app);
+  const content = sub === 'science' ? scienceView(app) : sub === 'day' ? dayView(app, dayKey) : current.view(app);
   root.replaceChildren(
     h('main', { class: 'page', id: 'main' }, content),
     h('nav', { class: 'tabbar', 'aria-label': 'Main' },
@@ -148,6 +163,8 @@ function applyTheme() {
     if (hostTheme) r.setAttribute('data-theme', hostTheme);
     else r.removeAttribute('data-theme');
   } else r.setAttribute('data-theme', 'dark');
+  r.setAttribute('data-accent', state.settings.accent || 'dusk');
+  r.setAttribute('data-motion', state.settings.motion ? 'on' : 'off');
   const bg = getComputedStyle(r).getPropertyValue('--ink').trim();
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg || '#14162a');
 }
