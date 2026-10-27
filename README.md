@@ -31,6 +31,9 @@ It is a Progressive Web App (PWA): one codebase that installs on a computer
   be switched to a firm stop.
 - **Soft transitions**: a heads-up chime two minutes before longer steps end
   that names what's next, an "up next" screen, and "+5 minutes" without guilt.
+- **Finish early**: tap Done whenever you're finished and the step still
+  counts. Skip is a separate choice, and "Back to …" undoes an accidental tap
+  with the timer right where it was.
 - **Breathing guide** for cyclic sighing, and a **Quick calm** button with
   gentle slow breathing for anxious moments, plus a 5-4-3-2-1 grounding
   option for when breathing exercises make things worse.

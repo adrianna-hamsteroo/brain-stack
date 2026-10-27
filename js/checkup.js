@@ -15,8 +15,9 @@ export function answerList(answers) {
 }
 
 // Renders the questions into `container`. onDone(answers) gets
-// { questionId: optionIndex } for whatever was answered.
-export function checkupFlow(container, { onDone }) {
+// { questionId: optionIndex } for whatever was answered. An optional
+// back = { label, onClick } adds a way back on the first question.
+export function checkupFlow(container, { onDone, back = null }) {
   const questions = enabledQuestions();
   const answers = {};
   let i = 0;
@@ -36,6 +37,7 @@ export function checkupFlow(container, { onDone }) {
       h('div', { class: 'row-actions' },
         h('button', { class: 'link', onclick: () => { i += 1; show(); } }, 'Skip this one'),
         h('button', { class: 'link', onclick: () => onDone(answers) }, i === 0 ? 'Skip the check-up' : 'Stop here')),
+      i === 0 && back && h('button', { class: 'link', onclick: back.onClick }, back.label),
     ));
   }
 }

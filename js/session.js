@@ -105,6 +105,10 @@ export function closeStaleSession() {
   save();
 }
 
+function duration(sec) {
+  return sec < 60 ? `${Math.max(1, Math.round(sec))} s` : minutesLabel(Math.round(sec / 60));
+}
+
 function hash(str) {
   let x = 2166136261;
   for (let i = 0; i < str.length; i++) x = Math.imul(x ^ str.charCodeAt(i), 16777619);
@@ -218,6 +222,7 @@ export function mountSession(host, { onExit }) {
         }, noiseWave(n), h('span', null, NOISE[n - 1])))),
       h('button', { class: 'btn ghost', onclick: () => pick(null) }, 'Skip'),
       before && first && h('p', { class: 'up-next' }, `First up: ${first.name}, ${stepLabel(first)}`),
+      !before && s.timer && !s.flags.ended && h('button', { class: 'link', onclick: backToStep }, `Back to ${s.steps[s.index].name.toLowerCase()}`),
     );
 
     function pick(n) {
@@ -269,14 +274,15 @@ export function mountSession(host, { onExit }) {
         h('p', null, `${step.minutes} minutes in. ${tpl?.nudge || 'Wrap up whenever you are ready.'}`),
         h('div', { class: 'row-actions' },
           h('button', { class: 'btn ghost small', onclick: () => { s.flags.nudgeDismissed = true; save(); render(); } }, 'Keep going'),
-          h('button', { class: 'btn primary small', onclick: finish }, 'Park it'))),
+          h('button', { class: 'btn primary small', onclick: () => finish('done') }, 'Park it'))),
       h('div', { class: 'controls' },
         h('button', { class: 'ctrl', onclick: togglePause, 'aria-pressed': paused ? 'true' : 'false', 'data-autofocus': '' },
           icon(paused ? 'play' : 'pause'), h('span', null, paused ? 'Resume' : 'Pause')),
         step.mode !== 'open' && !step.hardStop && h('button', { class: 'ctrl', onclick: addFive }, icon('plus'), h('span', null, '5 min')),
-        h('button', { class: 'ctrl primary', onclick: finish },
-          icon(next ? 'next' : 'check'), h('span', null, next ? 'Next' : 'Finish')),
+        h('button', { class: 'ctrl primary', onclick: () => finish('done'), 'aria-label': `Done with ${step.name}` },
+          icon('check'), h('span', null, 'Done')),
       ),
+      h('button', { class: 'link skip-step', onclick: () => finish('skipped') }, 'Skip this step'),
       next && h('p', { class: 'up-next' }, `Up next: ${next.name}, ${stepLabel(next)}`),
     );
   }
@@ -308,7 +314,10 @@ export function mountSession(host, { onExit }) {
     const next = s.steps[s.index + 1];
     const prevResult = s.results[s.index];
     const timeUp = s.flags.ended;
-    const status = prevResult?.status === 'skipped' ? 'skipped' : timeUp ? 'time’s up' : 'done';
+    const status = prevResult?.status === 'skipped' ? 'skipped'
+      : timeUp ? 'time’s up'
+      : s.flags.early ? `done in ${duration(prevResult.actualSec)}` : 'done';
+    const canReturn = !!s.timer && !timeUp;
     ui.breather = h('div', { class: 'breather', hidden: !s.breatherAt },
       h('span', { class: 'breather-text' }),
       h('button', { class: 'link', onclick: () => { s.breatherAt = null; save(); render(); } }, 'Stay here'));
@@ -323,6 +332,7 @@ export function mountSession(host, { onExit }) {
       ui.breather,
       h('div', { class: 'row-actions' },
         timeUp && prev.mode !== 'open' && !prev.hardStop && h('button', { class: 'btn ghost', onclick: moreTime, 'aria-label': `Add 5 more minutes to ${prev.name}` }, '5 more minutes'),
+        canReturn && h('button', { class: 'btn ghost', onclick: backToStep }, `Back to ${prev.name.toLowerCase()}`),
         h('button', { class: 'btn ghost', onclick: skipNext }, `Skip ${next.name.toLowerCase()}`)),
     );
   }
@@ -478,12 +488,25 @@ export function mountSession(host, { onExit }) {
     advance();
   }
 
-  // Moving on within the first 30 seconds counts as skipping the step.
-  function finish() {
+  // Done counts the step however early it ends; skipping is a separate choice.
+  function finish(status = 'done') {
     const now = Date.now();
     pause(s.timer, now);
-    record(s, elapsed(s.timer, now) * SPEED < 30000 ? 'skipped' : 'done', now);
+    record(s, status, now);
+    s.flags.early = status === 'done' && s.steps[s.index].mode !== 'open' && remaining(s.timer, now) > 0;
     advance();
+  }
+
+  // Undo an early Done or Skip: the paused timer carries on where it stopped.
+  function backToStep() {
+    unlock();
+    delete s.results[s.index];
+    resume(s.timer);
+    s.flags.early = false;
+    s.phase = 'step';
+    s.breatherAt = null;
+    save();
+    render();
   }
 
   function advance() {
@@ -512,7 +535,10 @@ export function mountSession(host, { onExit }) {
 
   function checkupScreen() {
     const box = h('div', { class: 'session-main' });
-    checkupFlow(box, { onDone: answers => { s.checkup = answers; finalize(); } });
+    const back = s.timer && !s.flags.ended
+      ? { label: `Back to ${s.steps[s.index].name.toLowerCase()}`, onClick: backToStep }
+      : null;
+    checkupFlow(box, { onDone: answers => { s.checkup = answers; finalize(); }, back });
     return box;
   }
 

@@ -676,6 +676,7 @@ input[type="range"] { accent-color: var(--lamp); width: min(9rem, 36vw); }
 .ctrl .icon { width: 24px; height: 24px; }
 .ctrl.primary { background: var(--lamp); color: var(--on-lamp); border-color: transparent; }
 .up-next { margin: 4px 0 0; color: var(--faint); font-size: var(--step--1); }
+.skip-step { padding: 4px 8px; font-size: var(--step--1); }
 
 .nudge {
   display: flex; flex-direction: column; gap: 10px;
