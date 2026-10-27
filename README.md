@@ -54,6 +54,8 @@ It is a Progressive Web App (PWA): one codebase that installs on a computer
   nights built in. Progress shows as little cairns of stones, a five-week
   calendar and history; tap any day to see its stack, check-up and
   activities. Missing a day never resets anything.
+- **Personal greeting**: add your name (Settings → You) and Tonight greets
+  you by name.
 - **Why these timings?** page inside the app with the research and sources.
 - Chimes are synthesized in the browser (no audio files). Everything stays on
   your device; backup/restore moves your data between phone and computer.

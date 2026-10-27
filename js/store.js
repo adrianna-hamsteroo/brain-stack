@@ -21,6 +21,7 @@ export const DEFAULT_SETTINGS = {
   theme: 'evening',    // 'evening' (always dark) | 'system' | 'light'
   accent: 'dusk',      // color theme, see THEMES
   motion: true,        // slowly drifting background
+  name: '',            // shown in the greeting on Tonight
   reminder: '21:00',
   routine: 'standard', // last stack picked by hand
   pick: null,          // { date, id }: tonight's hand-picked stack

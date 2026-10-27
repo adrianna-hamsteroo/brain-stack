@@ -1,7 +1,7 @@
 // Offline support: the app shell is cached on install and served cache-first,
 // refreshed in the background so updates arrive on the next launch.
 // Bump VERSION whenever you change any file listed in SHELL.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL_CACHE = `brain-stack-${VERSION}`;
 const FONT_CACHE = 'brain-stack-fonts';
 const SHELL = [

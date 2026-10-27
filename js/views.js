@@ -93,7 +93,10 @@ export function tonightView(app) {
   const dateLine = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return h('div', { class: 'view tonight' },
-    masthead(h('p', { class: 'eyebrow moonline' }, moonIcon(moon.p), `${dateLine} · ${moon.name}`), greeting(), 'xl'),
+    h('header', { class: 'masthead' },
+      h('p', { class: 'eyebrow moonline' }, moonIcon(moon.p), `${dateLine} \u00b7 ${moon.name}`),
+      h('h1', { class: 'display xl' }, state.settings.name ? `${greeting()}, ${state.settings.name}` : greeting()),
+      !state.settings.name && h('button', { class: 'link name-link', onclick: () => askName(app) }, 'Add your name')),
 
     h('section', { class: 'block' },
       h('h2', { class: 'label', id: 'stack-label' }, 'Tonight’s stack'),
@@ -271,6 +274,28 @@ export function routineView(app) {
           },
         }, 'Delete this stack'),
   );
+}
+
+async function askName(app) {
+  const name = await openSheet(close => {
+    const input = h('input', { id: 'name-input', type: 'text', maxlength: '30', autocomplete: 'given-name', placeholder: 'Your first name' });
+    const submit = () => close(input.value.trim());
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+    setTimeout(() => input.focus(), 60);
+    return [
+      h('h2', null, 'What should Brain Stack call you?'),
+      h('p', null, 'Your name only lives on this device. You can change it any time in Settings.'),
+      field('First name', input, 'name-input'),
+      h('div', { class: 'sheet-actions spaced' },
+        h('button', { class: 'btn ghost', onclick: () => close() }, 'Cancel'),
+        h('button', { class: 'btn primary', onclick: submit }, 'Save')),
+    ];
+  }, { label: 'Your name' });
+  if (!name) return;
+  state.settings.name = name;
+  save();
+  app.render();
+  toast(`Nice to meet you, ${name}`);
 }
 
 async function newStack(app, current) {
@@ -708,6 +733,18 @@ export function settingsView(app) {
 
   return h('div', { class: 'view settings' },
     masthead('Settings', 'Make it yours'),
+
+    h('section', { class: 'group' },
+      h('h2', { class: 'label' }, 'You'),
+      h('div', { class: 'setting column' },
+        h('label', { class: 'setting-text', for: 'set-name' },
+          h('span', { class: 'setting-label' }, 'Your name'),
+          h('span', { class: 'setting-hint' }, 'Used in the greeting on Tonight. It stays on this device.')),
+        h('input', {
+          id: 'set-name', type: 'text', maxlength: '30', autocomplete: 'given-name', placeholder: 'Your first name',
+          value: st.name || '',
+          oninput: e => { st.name = e.target.value.trim(); save(); },
+        }))),
 
     h('section', { class: 'group' },
       h('h2', { class: 'label' }, 'Sound and feel'),
